@@ -9,14 +9,50 @@ from prefect_aws import AwsCredentials
 from prefect_aws.s3 import S3Bucket
 
 class NBABucket(object):
-    
+
     def __init__(self):
-        self.aws_creds = AwsCredentials.load("aws-nba-etl-user-credentials")
-        self.bucket = S3Bucket.load("nba-bucket")
-        self.bucket_name = self.bucket.bucket_name
-        self.region_name = self.aws_creds.region_name
-        self.storage_options = {"key": self.aws_creds.aws_access_key_id, "secret": self.aws_creds.aws_secret_access_key.get_secret_value()}
-        self.fs = s3fs.S3FileSystem(**self.storage_options)
+        self._aws_creds = None
+        self._bucket = None
+        self._bucket_name = None
+        self._region_name = None
+        self._storage_options = None
+        self._fs = None
+
+    @property
+    def aws_creds(self):
+        if self._aws_creds is None:
+            self._aws_creds = AwsCredentials.load("aws-nba-etl-user-credentials")
+        return self._aws_creds
+
+    @property
+    def bucket(self):
+        if self._bucket is None:
+            self._bucket = S3Bucket.load("nba-bucket")
+        return self._bucket
+    
+    @property
+    def bucket_name(self):
+        if self._bucket_name is None:
+            self._bucket_name = self.bucket.bucket_name
+        return self._bucket_name
+
+    @property
+    def region_name(self):
+        if self._region_name is None:
+            self._region_name = self.aws_creds.region_name
+        return self._region_name
+    
+    @property
+    def storage_options(self):
+        if self._storage_options is None:
+            self._storage_options = {"key": self.aws_creds.aws_access_key_id, "secret": self.aws_creds.aws_secret_access_key.get_secret_value()}
+        return self._storage_options
+    
+    @property
+    def fs(self):
+        if self._fs is None:
+            self._fs = s3fs.S3FileSystem(**self.storage_options)
+        return self._fs
 
 
     def scan_parquet(self, filepath: str) -> LazyFrame:
