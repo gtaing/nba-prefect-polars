@@ -1,0 +1,15 @@
+bucket_files:
+    raw:
+        games_detail: raw/games_detail.parquet
+        player_stats: raw/playerstatistics.parquet
+
+    processed:
+        team_season_stats: team_season_stats.parquet
+        player_season_stats: player_season_stats.parquet
+
+
+database:
+    name: my_db
+    tables:
+        players_stats: players_stats
+        teams_stats: teams_stats
