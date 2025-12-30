@@ -26,13 +26,13 @@ class BucketConf:
 
     @classmethod
     def from_yaml(cls, path: str):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             config = yaml.safe_load(f)
 
         return cls(
-            raw=BucketRaw(**config['bucket_files']['raw']),
-            processed=BucketProcessed(**config['bucket_files']['processed'])
+            raw=BucketRaw(**config["bucket_files"]["raw"]),
+            processed=BucketProcessed(**config["bucket_files"]["processed"]),
         )
-    
+
 
 bucket_conf = BucketConf.from_yaml(PARAMETERS_FILE)

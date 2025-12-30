@@ -13,6 +13,8 @@ PLAYERS_METRICS = {
     "freeThrowsAttempted": "FTA",
     "freeThrowsMade": "FTM",
     "freeThrowsPercentage": "FT%",
+    "trueShootingAttempts": "TSA",
+    "trueShootingPercentage": "TS%",
     "reboundsDefensive": "DREB",
     "reboundsOffensive": "OREB",
     "reboundsTotal": "REB",

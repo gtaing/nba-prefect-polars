@@ -1,7 +1,7 @@
 import polars as pl
 
 from polars.testing import assert_frame_equal
-from src.players.season_stats import get_player_season_stats
+from src.players.seasons.task import get_player_season_stats
 
 
 def test_get_player_season_stats(monkeypatch):
@@ -17,6 +17,8 @@ def test_get_player_season_stats(monkeypatch):
                 "gameType": ["Regular", "Regular", "Regular", "Regular"],
                 "points": [10, 20, 15, 25],
                 "rebounds": [5, 7, 6, 8],
+                "fieldGoalsAttempted": [10, 12, 8, 10],
+                "freeThrowsAttempted": [2, 2, 2, 2],
             }
         ),
         "raw/games_detail.parquet": pl.LazyFrame(
@@ -37,8 +39,12 @@ def test_get_player_season_stats(monkeypatch):
             "personId": [102, 101],
             "gameType": ["Regular", "Regular"],
             "GP": [2, 2],
-            "PTS": [20.0, 15.0],  # mean of points
-            "REB": [7.0, 6.0],  # mean of rebounds
+            "PTS": [20.0, 15.0],
+            "REB": [7.0, 6.0],
+            "FGA": [9.0, 11.0],
+            "FTA": [2.0, 2.0],
+            "TSA": [9.9, 11.9],
+            "TS%": [1.0, 0.6],
         }
     )
 
@@ -49,12 +55,19 @@ def test_get_player_season_stats(monkeypatch):
     )
     # Patch PLAYERS_METRICS
     monkeypatch.setattr(
-        "src.players.season_stats.PLAYERS_METRICS",
-        {"points": "PTS", "rebounds": "REB"},
+        "src.players.seasons.task.PLAYERS_METRICS",
+        {
+            "points": "PTS",
+            "rebounds": "REB",
+            "fieldGoalsAttempted": "FGA",
+            "freeThrowsAttempted": "FTA",
+            "trueShootingAttempts": "TSA",
+            "trueShootingPercentage": "TS%",
+        },
     )
 
     # Run the function
-    output_path = get_player_season_stats.__wrapped__()
+    output_path = get_player_season_stats.fn()
 
     result = pl.read_parquet(output_path)
 

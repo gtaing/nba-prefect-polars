@@ -19,3 +19,8 @@ check:
 fix-format:
 	@echo "Fixing format issues with Ruff..."
 	$(PYTHON_PATH) -m ruff check --fix
+
+.PHONY: format
+format:
+	@echo "Formatting with Ruff..."
+	$(PYTHON_PATH) -m ruff format .

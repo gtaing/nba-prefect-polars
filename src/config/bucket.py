@@ -8,8 +8,8 @@ from pyarrow.dataset import dataset
 from prefect_aws import AwsCredentials
 from prefect_aws.s3 import S3Bucket
 
-class NBABucket(object):
 
+class NBABucket(object):
     def __init__(self):
         self._aws_creds = None
         self._bucket = None
@@ -29,7 +29,7 @@ class NBABucket(object):
         if self._bucket is None:
             self._bucket = S3Bucket.load("nba-bucket")
         return self._bucket
-    
+
     @property
     def bucket_name(self):
         if self._bucket_name is None:
@@ -41,19 +41,21 @@ class NBABucket(object):
         if self._region_name is None:
             self._region_name = self.aws_creds.region_name
         return self._region_name
-    
+
     @property
     def storage_options(self):
         if self._storage_options is None:
-            self._storage_options = {"key": self.aws_creds.aws_access_key_id, "secret": self.aws_creds.aws_secret_access_key.get_secret_value()}
+            self._storage_options = {
+                "key": self.aws_creds.aws_access_key_id,
+                "secret": self.aws_creds.aws_secret_access_key.get_secret_value(),
+            }
         return self._storage_options
-    
+
     @property
     def fs(self):
         if self._fs is None:
             self._fs = s3fs.S3FileSystem(**self.storage_options)
         return self._fs
-
 
     def scan_parquet(self, filepath: str) -> LazyFrame:
         """
@@ -69,9 +71,7 @@ class NBABucket(object):
         )
 
         ds = dataset(
-            source=f"{self.bucket_name}/{filepath}", 
-            filesystem=s3_fs, 
-            format="parquet"
+            source=f"{self.bucket_name}/{filepath}", filesystem=s3_fs, format="parquet"
         )
 
         return pl.scan_pyarrow_dataset(ds)

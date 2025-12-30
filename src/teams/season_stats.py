@@ -8,7 +8,6 @@ from config import bucket_conf
 from teams import TEAM_CONFIG_MAP, TEAM_METRICS
 
 
-
 def get_transformed_games(games_detail: LazyFrame, conf_type: str) -> LazyFrame:
     """
     Transform the games detail LazyFrame based on the configuration type.
@@ -53,8 +52,7 @@ def create_full_games(
     """
 
     game_season = (
-        games_detail
-        .with_columns(
+        games_detail.with_columns(
             pl.col("game_date").str.to_datetime().dt.year().alias("year")
         )
         .group_by("season_id")

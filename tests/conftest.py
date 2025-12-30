@@ -5,20 +5,22 @@ import pytest
 from tests import TARGET_DIR
 from config import bucket
 
+
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_target_dir():
     """Clean up the contents of the target directory once before all tests."""
     target_path = Path(TARGET_DIR)
     target_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Remove all contents
     for item in target_path.iterdir():
         if item.is_file():
             item.unlink()
         elif item.is_dir():
             import shutil
+
             shutil.rmtree(item)
-    
+
     yield
 
 

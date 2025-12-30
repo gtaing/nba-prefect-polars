@@ -11,8 +11,7 @@ def get_game_id_season() -> pl.LazyFrame:
     game_year = pl.col("game_date").str.to_datetime().dt.year()
 
     return (
-        games_detail
-        .with_columns(game_year.alias("year"))
+        games_detail.with_columns(game_year.alias("year"))
         .group_by("season_id", "game_id")
         .agg(pl.max("year").alias("season"))
     )
