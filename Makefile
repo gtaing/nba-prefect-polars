@@ -1,5 +1,9 @@
 PYTHON_PATH=.venv/bin/python
 
+.PHONY: deploy-flow
+deploy-flow:
+	$(PYTHON_PATH) src/main.py
+
 .PHONY: tests
 tests:
 	$(PYTHON_PATH) -m pytest -v tests/
