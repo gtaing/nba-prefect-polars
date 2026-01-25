@@ -42,5 +42,5 @@ jobs:
             PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
             PREFECT_IMAGE: ghcr.io/${{ github.repository }}:latest
           run: |
-            pip install -e .
+            pip install -r requirements.txt
             python src/main.py
