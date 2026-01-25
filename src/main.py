@@ -1,3 +1,5 @@
+import os
+
 from prefect import flow
 
 from players.seasons.task import get_player_season_stats
@@ -14,4 +16,14 @@ def season_stats():
 
 
 if __name__ == "__main__":
-    season_stats()
+    # Get image from environment variable, with fallback for local development
+    image = os.getenv(
+        "PREFECT_IMAGE",
+        "ghcr.io/my_image:latest",  # Fallback for local development
+    )
+    
+    season_stats.deploy(
+        name="nba-season-stats-deployment",
+        work_pool_name="default-work-pool",
+        image=image,
+    )
