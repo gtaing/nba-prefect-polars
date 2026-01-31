@@ -81,7 +81,7 @@ jobs:
 
           echo "Flow run ID: $FLOW_RUN_ID"
           echo "Waiting for flow to complete..."
-          uv run prefect flow-run watch "$FLOW_RUN_ID"
+          uv run prefect flow-run inspect "$FLOW_RUN_ID"
 
   build-dashboard:
     name: Build Dashboard
