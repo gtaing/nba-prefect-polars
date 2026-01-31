@@ -62,7 +62,7 @@ jobs:
           echo ""
           echo "=== Running deployment ==="
           # Run command without set -e so we can capture and debug
-          uv run prefect deployment run 'season_stats/nba-season-stats-deployment' 2>&1 | tee /tmp/flow_output.txt
+          uv run prefect deployment run 'season-stats/nba-season-stats-deployment' 2>&1 | tee /tmp/flow_output.txt
           COMMAND_EXIT_CODE=${PIPESTATUS[0]}
 
           echo ""
