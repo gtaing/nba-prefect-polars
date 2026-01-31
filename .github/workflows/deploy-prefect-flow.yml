@@ -1,34 +1,113 @@
-name: Deploy Prefect flow
+name: Deploy Prefect Flow & Publish Dashboard
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Required for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-    deploy:
-        name: Deploy
-        runs-on: ubuntu-latest
+  deploy-and-run:
+    name: Deploy & Run Flow
+    runs-on: ubuntu-latest
+    outputs:
+      flow_success: ${{ steps.run_flow.outcome == 'success' }}
 
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Setup Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: "3.12"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-        - name: Install uv
-          uses: astral-sh/setup-uv@v4
-          with:
-            version: "latest"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
-        - name: Install dependencies
-          run: uv sync
+      - name: Install dependencies
+        run: uv sync
 
-        - name: Prefect Deploy
-          env:
-            PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-            PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-          run: uv run prefect deploy --all
+      - name: Prefect Deploy
+        env:
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: uv run prefect deploy --all
+
+      - name: Run flow and wait for completion
+        id: run_flow
+        env:
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          echo "Triggering flow run..."
+          FLOW_RUN_OUTPUT=$(uv run prefect deployment run 'season_stats/nba-season-stats-deployment' --output json)
+          FLOW_RUN_ID=$(echo "$FLOW_RUN_OUTPUT" | jq -r '.id')
+          echo "Flow run ID: $FLOW_RUN_ID"
+
+          echo "Waiting for flow to complete..."
+          uv run prefect flow-run watch "$FLOW_RUN_ID"
+
+  build-dashboard:
+    name: Build Dashboard
+    runs-on: ubuntu-latest
+    needs: deploy-and-run
+    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: evidence/package-lock.json
+
+      - name: Install Evidence dependencies
+        working-directory: evidence
+        run: npm ci
+
+      - name: Build Evidence sources
+        working-directory: evidence
+        env:
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: npm run sources
+
+      - name: Build Evidence site
+        working-directory: evidence
+        env:
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: evidence/build
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-dashboard
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
