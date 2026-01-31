@@ -1,0 +1,8 @@
+boto3>=1.40.74
+fsspec>=2025.10.0
+loguru>=0.7.3
+polars>=1.35.2
+prefect>=3.6.2
+prefect-aws>=0.5.13
+pyarrow>=22.0.0
+s3fs>=0.4.2

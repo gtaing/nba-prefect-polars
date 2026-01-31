@@ -5,20 +5,10 @@ on:
         branches:
             - main
 
-env:
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
-
 jobs:
     deploy:
         name: Deploy
         runs-on: ubuntu-latest
-
-        permissions:
-            contents: read
-            packages: write
-            attestations: write
-            id-token: write
 
         steps:
         - name: Checkout
@@ -41,6 +31,4 @@ jobs:
           env:
             PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
             PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-            PREFECT_IMAGE: ghcr.io/${{ github.repository }}:latest
-          run: |
-            uv run python src/flow.py
+          run: uv run prefect deploy --all
