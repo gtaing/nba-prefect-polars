@@ -53,11 +53,23 @@ jobs:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: |
-          set -e
           echo "Triggering flow run..."
 
-          # Run command and capture output (both stdout and stderr)
+          # First, verify the deployment exists
+          echo "=== Listing deployments ==="
+          uv run prefect deployment ls || true
+
+          echo ""
+          echo "=== Running deployment ==="
+          # Run command without set -e so we can capture and debug
           uv run prefect deployment run 'season_stats/nba-season-stats-deployment' 2>&1 | tee /tmp/flow_output.txt
+          COMMAND_EXIT_CODE=${PIPESTATUS[0]}
+
+          echo ""
+          echo "=== Command exit code: $COMMAND_EXIT_CODE ==="
+          echo "=== Raw output ==="
+          cat /tmp/flow_output.txt
+          echo "=== End raw output ==="
 
           # Extract UUID from text output
           FLOW_RUN_ID=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/flow_output.txt | head -1)
