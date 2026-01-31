@@ -1,6 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 import polars as pl
 import pytest
@@ -44,22 +45,27 @@ class TestDBMode:
 
     def test_production_mode_from_env(self, monkeypatch):
         monkeypatch.setenv("DUCKDB_MODE", "production")
-        monkeypatch.setenv("motherduck_token", "test_token")
+        monkeypatch.setenv("MOTHERDUCK_TOKEN", "test_token")
         db = DuckDB()
         assert db.mode == DBMode.PRODUCTION
 
     def test_production_mode_is_default(self, monkeypatch):
         monkeypatch.delenv("DUCKDB_MODE", raising=False)
-        monkeypatch.setenv("motherduck_token", "test_token")
+        monkeypatch.setenv("MOTHERDUCK_TOKEN", "test_token")
         db = DuckDB()
         assert db.mode == DBMode.PRODUCTION
 
     def test_production_mode_requires_token(self, monkeypatch):
         monkeypatch.setenv("DUCKDB_MODE", "production")
-        monkeypatch.delenv("motherduck_token", raising=False)
-        db = DuckDB()
-        with pytest.raises(ValueError, match="motherduck_token"):
-            _ = db.conn_str
+        monkeypatch.delenv("MOTHERDUCK_TOKEN", raising=False)
+
+        # Mock the Prefect Secret block to fail
+        with patch("prefect.blocks.system.Secret") as mock_secret:
+            mock_secret.load.side_effect = Exception("Secret block not found")
+
+            db = DuckDB()
+            with pytest.raises(ValueError, match="MOTHERDUCK_TOKEN"):
+                _ = db.conn_str
 
 
 class TestDuckDBLocal:

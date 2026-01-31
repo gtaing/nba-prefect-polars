@@ -104,25 +104,17 @@ jobs:
         working-directory: evidence
         run: npm ci
 
-      - name: Debug token
-        env:
-          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
-        run: |
-          echo "Token is set: $([ -n "$MOTHERDUCK_TOKEN" ] && echo 'YES' || echo 'NO')"
-          echo "Token length: ${#MOTHERDUCK_TOKEN}"
-          echo "First 4 chars: ${MOTHERDUCK_TOKEN:0:4}"
-          echo "Dot count: $(echo "$MOTHERDUCK_TOKEN" | tr -cd '.' | wc -c)"
-
       - name: Build Evidence sources
         working-directory: evidence
         env:
-          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+          # Evidence expects EVIDENCE_SOURCE__[source_name]__[option] format with base64 encoded values
+          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN_BASE64 }}
         run: npm run sources
 
       - name: Build Evidence site
         working-directory: evidence
         env:
-          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN_BASE64 }}
         run: npm run build
 
       - name: Upload artifact
