@@ -53,14 +53,21 @@ jobs:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: |
+          set -e
           echo "Triggering flow run..."
-          FLOW_RUN_OUTPUT=$(uv run prefect deployment run 'season_stats/nba-season-stats-deployment')
-          echo "$FLOW_RUN_OUTPUT"
 
-          # Extract UUID from text output (line containing "UUID:")
-          FLOW_RUN_ID=$(echo "$FLOW_RUN_OUTPUT" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+          # Run command and capture output (both stdout and stderr)
+          uv run prefect deployment run 'season_stats/nba-season-stats-deployment' 2>&1 | tee /tmp/flow_output.txt
+
+          # Extract UUID from text output
+          FLOW_RUN_ID=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/flow_output.txt | head -1)
+
+          if [ -z "$FLOW_RUN_ID" ]; then
+            echo "ERROR: Could not extract flow run ID from output"
+            exit 1
+          fi
+
           echo "Flow run ID: $FLOW_RUN_ID"
-
           echo "Waiting for flow to complete..."
           uv run prefect flow-run watch "$FLOW_RUN_ID"
 
