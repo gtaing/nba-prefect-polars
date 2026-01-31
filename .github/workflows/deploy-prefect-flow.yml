@@ -104,6 +104,15 @@ jobs:
         working-directory: evidence
         run: npm ci
 
+      - name: Debug token
+        env:
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: |
+          echo "Token is set: $([ -n "$MOTHERDUCK_TOKEN" ] && echo 'YES' || echo 'NO')"
+          echo "Token length: ${#MOTHERDUCK_TOKEN}"
+          echo "First 4 chars: ${MOTHERDUCK_TOKEN:0:4}"
+          echo "Dot count: $(echo "$MOTHERDUCK_TOKEN" | tr -cd '.' | wc -c)"
+
       - name: Build Evidence sources
         working-directory: evidence
         env:
