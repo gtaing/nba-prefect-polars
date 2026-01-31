@@ -1,0 +1,7 @@
+# MotherDuck connection for NBA stats
+# Set MOTHERDUCK_TOKEN environment variable before running
+name: nba
+type: motherduck
+options:
+  token: ${MOTHERDUCK_TOKEN}
+  database: my_db
