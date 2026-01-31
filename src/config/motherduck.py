@@ -37,15 +37,37 @@ class DuckDB:
     def mode(self) -> DBMode:
         return self._mode
 
+    def _get_motherduck_token(self) -> str:
+        """Get MotherDuck token from environment or Prefect Secret block."""
+        # First try environment variable (for local dev and Evidence)
+        token = os.getenv("MOTHERDUCK_TOKEN")
+        if token:
+            logger.info("Using MOTHERDUCK_TOKEN from environment variable")
+            return token
+
+        # Fall back to Prefect Secret block (for Prefect Cloud execution)
+        try:
+            from prefect.blocks.system import Secret
+
+            secret_block = Secret.load("motherduck-token")
+            token = secret_block.get()
+            logger.info("Using MOTHERDUCK_TOKEN from Prefect Secret block")
+            return token
+        except Exception as e:
+            logger.warning(f"Could not load Prefect Secret block: {e}")
+
+        raise ValueError(
+            "MOTHERDUCK_TOKEN not found. Set it as an environment variable "
+            "or create a Prefect Secret block named 'motherduck-token'"
+        )
+
     @property
     def conn_str(self) -> str:
         if self._mode == DBMode.LOCAL:
             self.LOCAL_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
             return str(self.LOCAL_DB_PATH)
 
-        token = os.getenv("MOTHERDUCK_TOKEN")
-        if not token:
-            raise ValueError("motherduck_token environment variable is required for production mode")
+        token = self._get_motherduck_token()
         return f"md:{self.database}?motherduck_token={token}"
 
     @property
