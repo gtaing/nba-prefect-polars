@@ -2,7 +2,7 @@ PYTHON_PATH=.venv/bin/python
 
 .PHONY: deploy-flow
 deploy-flow:
-	$(PYTHON_PATH) src/main.py
+	$(PYTHON_PATH) src/flow.py
 
 .PHONY: tests
 tests:

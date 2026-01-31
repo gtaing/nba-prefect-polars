@@ -24,13 +24,6 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v4
 
-        - name: Log in to the Container registry
-          uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-          with:
-            registry: ${{ env.REGISTRY }}
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
-
         - name: Setup Python
           uses: actions/setup-python@v5
           with:
@@ -50,4 +43,4 @@ jobs:
             PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
             PREFECT_IMAGE: ghcr.io/${{ github.repository }}:latest
           run: |
-            uv run python src/main.py
+            uv run python src/flow.py

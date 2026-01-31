@@ -16,14 +16,11 @@ def season_stats():
 
 
 if __name__ == "__main__":
-    # Get image from environment variable, with fallback for local development
-    image = os.getenv(
-        "PREFECT_IMAGE",
-        "ghcr.io/my_image:latest",  # Fallback for local development
-    )
-    
-    season_stats.deploy(
+
+    flow.from_source(
+        source="https://github.com/gtaing/nba-prefect-polars.git",
+        entrypoint="src/flow.py:season_stats"
+    ).deploy(
         name="nba-season-stats-deployment",
-        work_pool_name="default-work-pool",
-        image=image,
+        work_pool_name="my-managed-pool",
     )
