@@ -54,7 +54,7 @@ jobs:
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: |
           echo "Triggering flow run..."
-          FLOW_RUN_OUTPUT=$(uv run prefect deployment run 'season_stats/nba-season-stats-deployment' --output json)
+          FLOW_RUN_OUTPUT=$(uv run prefect deployment run 'season_stats/nba-season-stats-deployment')
           FLOW_RUN_ID=$(echo "$FLOW_RUN_OUTPUT" | jq -r '.id')
           echo "Flow run ID: $FLOW_RUN_ID"
 
