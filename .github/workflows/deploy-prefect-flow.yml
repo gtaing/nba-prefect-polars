@@ -108,13 +108,13 @@ jobs:
         working-directory: evidence
         env:
           # Evidence expects EVIDENCE_SOURCE__[source_name]__[option] format with base64 encoded values
-          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN_BASE64 }}
+          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
         run: npm run sources
 
       - name: Build Evidence site
         working-directory: evidence
         env:
-          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN_BASE64 }}
+          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
         run: npm run build
 
       - name: Upload artifact
