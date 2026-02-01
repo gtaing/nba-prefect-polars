@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      skip_prefect_deploy_and_run:
+        description: 'Skip the prefect deployment and run step'
+        type: boolean
+        default : true
 
 # Required for GitHub Pages deployment
 permissions:
@@ -52,6 +57,7 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        if: ${{ inputs.skip_prefect_deploy_and_run == 'false'}}
         run: |
           echo "Triggering flow run..."
 
@@ -87,7 +93,7 @@ jobs:
     name: Build Dashboard
     runs-on: ubuntu-latest
     needs: deploy-and-run
-    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' }}
+    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' || inputs.skip_prefect_deploy_and_run == 'true' }}  
 
     steps:
       - name: Checkout
@@ -120,7 +126,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: evidence/build
+          path: evidence/build/
 
   deploy-pages:
     name: Deploy to GitHub Pages
