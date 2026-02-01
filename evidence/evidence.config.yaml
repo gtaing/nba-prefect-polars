@@ -1,3 +1,5 @@
+basePath: /nba-prefect-polars/
+
 appearance:
   default: system
   switcher: true

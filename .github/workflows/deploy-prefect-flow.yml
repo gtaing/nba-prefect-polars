@@ -46,42 +46,6 @@ jobs:
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: uv run prefect deploy --all
 
-      - name: Run flow and wait for completion
-        id: run_flow
-        env:
-          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: |
-          echo "Triggering flow run..."
-
-          # First, verify the deployment exists
-          echo "=== Listing deployments ==="
-          uv run prefect deployment ls || true
-
-          echo ""
-          echo "=== Running deployment ==="
-          # Run command without set -e so we can capture and debug
-          uv run prefect deployment run 'season-stats/nba-season-stats-deployment' 2>&1 | tee /tmp/flow_output.txt
-          COMMAND_EXIT_CODE=${PIPESTATUS[0]}
-
-          echo ""
-          echo "=== Command exit code: $COMMAND_EXIT_CODE ==="
-          echo "=== Raw output ==="
-          cat /tmp/flow_output.txt
-          echo "=== End raw output ==="
-
-          # Extract UUID from text output
-          FLOW_RUN_ID=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/flow_output.txt | head -1)
-
-          if [ -z "$FLOW_RUN_ID" ]; then
-            echo "ERROR: Could not extract flow run ID from output"
-            exit 1
-          fi
-
-          echo "Flow run ID: $FLOW_RUN_ID"
-          echo "Waiting for flow to complete..."
-          uv run prefect flow-run inspect "$FLOW_RUN_ID"
-
 
   build-dashboard:
     name: Build Dashboard
