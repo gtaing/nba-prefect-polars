@@ -68,23 +68,20 @@ jobs:
         working-directory: evidence
         run: npm ci
 
-      - name: Build Evidence sources
+      - name: Build Evidence sources and sites
         working-directory: evidence
         env:
+          BASE_PATH: '/${{ github.event.repository.name }}'
           # Evidence expects EVIDENCE_SOURCE__[source_name]__[option] format with base64 encoded values
           EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
-        run: npm run sources
-
-      - name: Build Evidence site
-        working-directory: evidence
-        env:
-          EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
-        run: npm run build
+        run: |
+          npm run sources
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: evidence/build/
+          path: 'build/${{ github.event.repository.name }}'
 
   deploy-pages:
     name: Deploy to GitHub Pages
