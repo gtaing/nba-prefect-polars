@@ -1,4 +1,4 @@
-basePath: /nba-prefect-polars
+basePath: /nba-prefect-polars/evidence
 
 appearance:
   default: system

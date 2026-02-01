@@ -71,6 +71,7 @@ jobs:
       - name: Build Evidence sources and sites
         working-directory: evidence
         env:
+          BASE_PATH: '/${{ github.event.repository.name }}/evidence'
           # Evidence expects EVIDENCE_SOURCE__[source_name]__[option] format with base64 encoded values
           EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
         run: |
@@ -80,7 +81,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'build/${{ github.event.repository.name }}'
+          path: 'evidence/build/'
 
   deploy-pages:
     name: Deploy to GitHub Pages
