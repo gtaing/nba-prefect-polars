@@ -51,7 +51,7 @@ jobs:
     name: Build Dashboard
     runs-on: ubuntu-latest
     needs: deploy-and-run
-    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' }}  
+    #if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' }}  
 
     steps:
       - name: Checkout
