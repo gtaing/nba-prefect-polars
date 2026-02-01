@@ -49,7 +49,7 @@ jobs:
       - name: Decide execution mode
         id: decide
         run: |
-          if [[ "${{ inputs.skip_prefect_deploy_and_run }}" == "true" ]]; then
+          if [[ ${{ inputs.skip_prefect_deploy_and_run }} == "true" ]]; then
             echo "mode=skip" >> $GITHUB_OUTPUT
           else
             echo "mode=run" >> $GITHUB_OUTPUT
