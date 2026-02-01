@@ -50,6 +50,7 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        if: ${{ inputs.skip_prefect_deploy_and_run == 'false'}}
         run: uv run prefect deploy --all
 
       - name: Run flow and wait for completion
