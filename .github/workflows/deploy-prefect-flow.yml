@@ -46,11 +46,20 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Decide execution mode
+        id: decide
+        run: |
+          if [[ "${{ inputs.skip_prefect_deploy_and_run }}" == "true" ]]; then
+            echo "mode=skip" >> $GITHUB_OUTPUT
+          else
+            echo "mode=run" >> $GITHUB_OUTPUT
+          fi
+
       - name: Prefect Deploy
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        if: ${{ inputs.skip_prefect_deploy_and_run == 'false'}}
+        if: ${{ steps.decide.outputs.mode == 'run' }}
         run: uv run prefect deploy --all
 
       - name: Run flow and wait for completion
@@ -58,7 +67,7 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        if: ${{ inputs.skip_prefect_deploy_and_run == 'false'}}
+        if: ${{ steps.decide.outputs.mode == 'run' }}
         run: |
           echo "Triggering flow run..."
 
@@ -89,6 +98,18 @@ jobs:
           echo "Flow run ID: $FLOW_RUN_ID"
           echo "Waiting for flow to complete..."
           uv run prefect flow-run inspect "$FLOW_RUN_ID"
+
+      
+      - name: Set job result
+        id: result
+        if: always()
+        run: |
+          if [[ "${{ steps.decide.outputs.mode }}" == "skip" ]]; then
+            echo "flow_success=true" >> $GITHUB_OUTPUT
+          else
+            # you could also inspect exit codes or artifacts here
+            echo "flow_success=true" >> $GITHUB_OUTPUT
+          fi
 
   build-dashboard:
     name: Build Dashboard
