@@ -1,4 +1,5 @@
-basePath: /nba-prefect-polars
+deployment:
+  basePath: /nba-prefect-polars
 
 appearance:
   default: system
