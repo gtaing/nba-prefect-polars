@@ -71,7 +71,6 @@ jobs:
       - name: Build Evidence sources and sites
         working-directory: evidence
         env:
-          BASE_PATH: '${{ github.event.repository.name }}'
           # Evidence expects EVIDENCE_SOURCE__[source_name]__[option] format with base64 encoded values
           EVIDENCE_SOURCE__nba__token: ${{ secrets.MOTHERDUCK_TOKEN }}
         run: |
