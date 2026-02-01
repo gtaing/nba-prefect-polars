@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      skip_prefect_deploy_and_run:
-        description: 'Skip the prefect deployment and run step'
-        type: boolean
-        default : true
 
 # Required for GitHub Pages deployment
 permissions:
@@ -46,20 +40,10 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Decide execution mode
-        id: decide
-        run: |
-          if [[ ${{ inputs.skip_prefect_deploy_and_run }} == "true" ]]; then
-            echo "mode=skip" >> $GITHUB_OUTPUT
-          else
-            echo "mode=run" >> $GITHUB_OUTPUT
-          fi
-
       - name: Prefect Deploy
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        if: ${{ steps.decide.outputs.mode == 'run' }}
         run: uv run prefect deploy --all
 
       - name: Run flow and wait for completion
@@ -67,7 +51,6 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        if: ${{ steps.decide.outputs.mode == 'run' }}
         run: |
           echo "Triggering flow run..."
 
@@ -99,23 +82,12 @@ jobs:
           echo "Waiting for flow to complete..."
           uv run prefect flow-run inspect "$FLOW_RUN_ID"
 
-      
-      - name: Set job result
-        id: result
-        if: always()
-        run: |
-          if [[ "${{ steps.decide.outputs.mode }}" == "skip" ]]; then
-            echo "flow_success=true" >> $GITHUB_OUTPUT
-          else
-            # you could also inspect exit codes or artifacts here
-            echo "flow_success=true" >> $GITHUB_OUTPUT
-          fi
 
   build-dashboard:
     name: Build Dashboard
     runs-on: ubuntu-latest
     needs: deploy-and-run
-    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' || inputs.skip_prefect_deploy_and_run == 'true' }}  
+    if: ${{ needs.deploy-and-run.outputs.flow_success == 'true' }}  
 
     steps:
       - name: Checkout
